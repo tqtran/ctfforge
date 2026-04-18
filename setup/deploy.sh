@@ -25,7 +25,9 @@ define('DB_NAME', $(php_literal "${DB_NAME}"));
 define('DB_USER', $(php_literal "${DB_USER}"));
 define('DB_PASS', $(php_literal "${DB_PASS}"));
 EOF
-  chmod 600 "${SECRETS_FILE}" 2>/dev/null || true
+  if ! chmod 600 "${SECRETS_FILE}"; then
+    printf 'Warning: could not restrict permissions on %s\n' "${SECRETS_FILE}" >&2
+  fi
 fi
 
 cat <<EOF

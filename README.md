@@ -11,4 +11,4 @@ CTFForge is a lightweight PHP/MySQL platform for running CTF-style competitions 
 2. Create the database and import the schema from `./setup/schema.sql`.
 3. Configure your web server to serve the repository root.
 
-The deployment helper lives in `./setup`, and `framework/schema.sql` is kept in sync with `setup/schema.sql` for compatibility with existing paths.
+The deployment helper lives in `./setup`. Use `setup/schema.sql` as the canonical schema file and run `bash ./setup/sync-schema.sh` to refresh `framework/schema.sql` when the schema changes.

@@ -5,7 +5,8 @@ Use this folder for fast local or server deployment.
 ## Files
 
 - `deploy.sh` generates `framework/secrets/db.php`, ensures required directories exist, and prints the database import command.
-- `schema.sql` is the deployment-ready schema copy.
+- `schema.sql` is the canonical, deployment-ready schema copy.
+- `sync-schema.sh` copies the canonical schema into `framework/schema.sql`.
 
 ## Usage
 
@@ -15,3 +16,4 @@ mysql -h <host> -u <user> --database=<database> -p < ./setup/schema.sql
 ```
 
 Keep `setup/schema.sql` and `framework/schema.sql` identical whenever the schema changes.
+After editing `setup/schema.sql`, run `bash ./setup/sync-schema.sh`.
