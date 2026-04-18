@@ -95,7 +95,6 @@ include __DIR__ . '/../framework/views/header.php';
               <?= csrf_field() ?>
               <input type="hidden" name="challenge_id" value="<?= $challenge['id'] ?>">
               <input type="hidden" name="dataset_id" value="<?= $dataset['id'] ?>">
-              <input type="hidden" name="competition_id" value="<?= $comp['id'] ?>">
               <?= $plugin->renderQuestion($dataset) ?>
               <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-paper-plane me-1"></i>Submit</button>
             </form>
