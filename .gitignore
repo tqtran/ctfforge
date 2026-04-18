@@ -1,0 +1,4 @@
+framework/secrets/db.php
+uploads/*
+!uploads/.gitkeep
+*.log
