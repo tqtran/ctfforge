@@ -37,7 +37,7 @@ Schema file:     ${SCHEMA_FILE}
 Next steps:
   1. Create the database if it does not already exist.
   2. Import the schema:
-     mysql -h ${DB_HOST} -u ${DB_USER} -p ${DB_NAME} < ${SCHEMA_FILE}
+     mysql -h ${DB_HOST} -u ${DB_USER} --database=${DB_NAME} -p < ${SCHEMA_FILE}
   3. Point your web server at:
      ${REPO_ROOT}
 

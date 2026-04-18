@@ -11,7 +11,7 @@ Use this folder for fast local or server deployment.
 
 ```bash
 bash ./setup/deploy.sh
-mysql -h <host> -u <user> -p <database> < ./setup/schema.sql
+mysql -h <host> -u <user> --database=<database> -p < ./setup/schema.sql
 ```
 
 Keep `setup/schema.sql` and `framework/schema.sql` identical whenever the schema changes.
