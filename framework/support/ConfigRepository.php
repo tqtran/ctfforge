@@ -79,7 +79,7 @@ class ConfigRepository {
     private function write(string $path, array $data): void {
         $directory = dirname($path);
         if (!is_dir($directory)) {
-            mkdir($directory, 0775, true);
+            mkdir($directory, 0750, true);
         }
         file_put_contents($path, SimpleYaml::dump($data), LOCK_EX);
     }
