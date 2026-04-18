@@ -34,12 +34,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_challenge'])) {
 
                     $imagePath = null;
                     if ($pluginType === 'image_question' && isset($_FILES['images']['tmp_name'][$i]) && $_FILES['images']['error'][$i] === UPLOAD_ERR_OK) {
+                        $tmpPath = $_FILES['images']['tmp_name'][$i];
                         $ext = strtolower(pathinfo($_FILES['images']['name'][$i], PATHINFO_EXTENSION));
-                        $allowed = ['jpg','jpeg','png','gif','webp'];
-                        if (in_array($ext, $allowed, true)) {
-                            $filename = 'img_' . $challengeId . '_' . $i . '_' . time() . '.' . $ext;
+                        $allowedExts = ['jpg','jpeg','png','gif','webp'];
+                        $allowedMimes = ['image/jpeg','image/png','image/gif','image/webp'];
+                        $finfo = new finfo(FILEINFO_MIME_TYPE);
+                        $mime = $finfo->file($tmpPath);
+                        if (in_array($ext, $allowedExts, true) && in_array($mime, $allowedMimes, true)) {
+                            $filename = bin2hex(random_bytes(16)) . '.' . $ext;
                             $dest = UPLOAD_DIR . $filename;
-                            if (move_uploaded_file($_FILES['images']['tmp_name'][$i], $dest)) {
+                            if (move_uploaded_file($tmpPath, $dest)) {
                                 $imagePath = $filename;
                             }
                         }

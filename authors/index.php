@@ -47,8 +47,8 @@ include __DIR__ . '/../framework/views/header.php';
             <td><?= (int)($stats['total'] ?? 0) ?></td>
             <td>
               <span class="badge bg-success"><?= (int)($stats['correct'] ?? 0) ?></span>
-              <?php if ($stats['total'] > 0): ?>
-              <small class="text-muted">(<?= round($stats['correct'] / $stats['total'] * 100) ?>%)</small>
+              <?php if ((int)($stats['total'] ?? 0) > 0): ?>
+              <small class="text-muted">(<?= round((int)$stats['correct'] / (int)$stats['total'] * 100) ?>%)</small>
               <?php endif; ?>
             </td>
             <td><?= date('Y-m-d', strtotime($ch['created_at'])) ?></td>
