@@ -17,6 +17,10 @@ class Challenge {
         return $this->db->query('SELECT c.*, u.username as author FROM challenges c LEFT JOIN users u ON c.created_by = u.id ORDER BY c.created_at DESC')->fetchAll();
     }
 
+    public function countAll(): int {
+        return (int)$this->db->query('SELECT COUNT(*) FROM challenges')->fetchColumn();
+    }
+
     public function findByAuthor(int $userId): array {
         $stmt = $this->db->prepare('SELECT * FROM challenges WHERE created_by = ? ORDER BY created_at DESC');
         $stmt->execute([$userId]);

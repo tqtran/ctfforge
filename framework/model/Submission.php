@@ -16,12 +16,14 @@ class Submission {
 
     public function findByUser(int $userId): array {
         $stmt = $this->db->prepare(
-            'SELECT s.*, c.title as challenge_title, c.points FROM submissions s 
-             JOIN challenges c ON s.challenge_id = c.id 
-             WHERE s.user_id = ? ORDER BY s.submitted_at DESC'
+            'SELECT s.*, c.title as challenge_title, c.points FROM submissions s JOIN challenges c ON s.challenge_id = c.id WHERE s.user_id = ? ORDER BY s.submitted_at DESC'
         );
         $stmt->execute([$userId]);
         return $stmt->fetchAll();
+    }
+
+    public function countAll(): int {
+        return (int)$this->db->query('SELECT COUNT(*) FROM submissions')->fetchColumn();
     }
 
     public function countCorrect(int $userId): int {
@@ -32,9 +34,7 @@ class Submission {
 
     public function totalPoints(int $userId): int {
         $stmt = $this->db->prepare(
-            'SELECT COALESCE(SUM(c.points), 0) FROM submissions s 
-             JOIN challenges c ON s.challenge_id = c.id 
-             WHERE s.user_id = ? AND s.is_correct = 1'
+            'SELECT COALESCE(SUM(c.points), 0) FROM submissions s JOIN challenges c ON s.challenge_id = c.id WHERE s.user_id = ? AND s.is_correct = 1'
         );
         $stmt->execute([$userId]);
         return (int)$stmt->fetchColumn();

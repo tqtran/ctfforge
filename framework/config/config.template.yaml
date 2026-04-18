@@ -1,0 +1,67 @@
+sections:
+  - key: application
+    title: Application
+    description: Core platform settings shown across every dashboard.
+    fields:
+      - path: app.name
+        label: Application Name
+        source: config
+        type: text
+        required: true
+        help: Display name used in the UI.
+      - path: app.url
+        label: Application URL
+        source: config
+        type: url
+        required: true
+        help: Base URL used when building links.
+      - path: app.debug
+        label: Debug Mode
+        source: config
+        type: boolean
+        required: true
+        help: Enable verbose runtime diagnostics.
+  - key: uploads
+    title: Upload Storage
+    description: Configure where challenge assets are stored and served from.
+    fields:
+      - path: uploads.dir
+        label: Upload Directory
+        source: config
+        type: text
+        required: true
+        help: Relative or absolute path for uploaded files.
+      - path: uploads.url
+        label: Upload URL
+        source: config
+        type: text
+        required: true
+        help: Public URL path used for uploaded assets.
+  - key: database
+    title: Database Secrets
+    description: Credentials stored separately from the shared application config.
+    fields:
+      - path: database.host
+        label: Database Host
+        source: secrets
+        type: text
+        required: true
+        help: Hostname of the MySQL server.
+      - path: database.name
+        label: Database Name
+        source: secrets
+        type: text
+        required: true
+        help: Database schema name.
+      - path: database.user
+        label: Database User
+        source: secrets
+        type: text
+        required: true
+        help: Database login user.
+      - path: database.password
+        label: Database Password
+        source: secrets
+        type: password
+        secret: true
+        help: Leave blank to keep the current password.

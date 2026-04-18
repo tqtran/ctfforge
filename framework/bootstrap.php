@@ -1,11 +1,54 @@
 <?php
-require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/support/SimpleYaml.php';
+require_once __DIR__ . '/support/ConfigRepository.php';
 
-$secretsFile = __DIR__ . '/secrets/db.php';
-if (!file_exists($secretsFile)) {
-    die('Database credentials not configured. Copy framework/secrets/db.php.example to framework/secrets/db.php and fill in your credentials.');
+$configRepository = app_config_repository();
+$config = $configRepository->loadConfig();
+if (!$configRepository->hasSecretsFile()) {
+    die($configRepository->missingSecretsMessage());
 }
-require_once $secretsFile;
+$secrets = $configRepository->loadSecrets();
+
+$rootPath = realpath(__DIR__ . '/..') ?: dirname(__DIR__);
+$appUrl = rtrim((string)ConfigRepository::getValue($config, 'app.url', 'http://localhost'), '/');
+$uploadDirSetting = (string)ConfigRepository::getValue($config, 'uploads.dir', 'uploads');
+$uploadUrlSetting = (string)ConfigRepository::getValue($config, 'uploads.url', '/uploads');
+
+if (!preg_match('/^(\/|[A-Za-z]:[\\\/])/', $uploadDirSetting)) {
+    $uploadDirSetting = $rootPath . '/' . ltrim($uploadDirSetting, '/');
+}
+$uploadDir = rtrim(str_replace('\\', '/', $uploadDirSetting), '/') . '/';
+$uploadUrl = preg_match('/^https?:\/\//i', $uploadUrlSetting)
+    ? rtrim($uploadUrlSetting, '/')
+    : $appUrl . '/' . ltrim($uploadUrlSetting, '/');
+
+if (!defined('APP_NAME')) {
+    define('APP_NAME', (string)ConfigRepository::getValue($config, 'app.name', 'CTFForge'));
+}
+if (!defined('APP_URL')) {
+    define('APP_URL', $appUrl);
+}
+if (!defined('DEBUG')) {
+    define('DEBUG', ConfigRepository::normalizeBoolean(ConfigRepository::getValue($config, 'app.debug', false)));
+}
+if (!defined('UPLOAD_DIR')) {
+    define('UPLOAD_DIR', $uploadDir);
+}
+if (!defined('UPLOAD_URL')) {
+    define('UPLOAD_URL', $uploadUrl);
+}
+if (!defined('DB_HOST')) {
+    define('DB_HOST', (string)ConfigRepository::getValue($secrets, 'database.host', 'localhost'));
+}
+if (!defined('DB_NAME')) {
+    define('DB_NAME', (string)ConfigRepository::getValue($secrets, 'database.name', 'ctfforge'));
+}
+if (!defined('DB_USER')) {
+    define('DB_USER', (string)ConfigRepository::getValue($secrets, 'database.user', 'root'));
+}
+if (!defined('DB_PASS')) {
+    define('DB_PASS', (string)ConfigRepository::getValue($secrets, 'database.password', ''));
+}
 
 require_once __DIR__ . '/model/Database.php';
 require_once __DIR__ . '/model/User.php';
@@ -18,6 +61,20 @@ require_once __DIR__ . '/plugins/ImageQuestion/ImageQuestion.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+}
+
+function app_config_repository(): ConfigRepository {
+    static $repository = null;
+    if ($repository === null) {
+        $repository = new ConfigRepository(
+            __DIR__ . '/config/config.yaml',
+            __DIR__ . '/config/config.template.yaml',
+            __DIR__ . '/secrets/db.yaml',
+            __DIR__ . '/secrets/db.yaml.example'
+        );
+    }
+
+    return $repository;
 }
 
 function auth_user(): ?array {
@@ -37,7 +94,7 @@ function require_role(string $role): void {
     if (!$user) {
         redirect(APP_URL . '/index.php');
     }
-    if ($user['role'] !== $role) {
+    if ($user['role'] !== $role && $user['role'] !== 'admin') {
         http_response_code(403);
         die('Access denied. Required role: ' . htmlspecialchars($role));
     }
@@ -90,6 +147,7 @@ function dashboard_url(string $role): string {
         'participant' => APP_URL . '/participants/index.php',
         'organizer'   => APP_URL . '/organizers/index.php',
         'author'      => APP_URL . '/authors/index.php',
+        'admin'       => APP_URL . '/admin/index.php',
         default       => APP_URL . '/index.php',
     };
 }

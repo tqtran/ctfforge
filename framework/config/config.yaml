@@ -1,0 +1,7 @@
+app:
+  name: CTFForge
+  url: http://localhost
+  debug: false
+uploads:
+  dir: uploads
+  url: /uploads

@@ -15,7 +15,6 @@ $user = auth_user();
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
 <div class="app-wrapper">
 
-  <!-- Navbar -->
   <nav class="app-header navbar navbar-expand bg-body">
     <div class="container-fluid">
       <ul class="navbar-nav">
@@ -36,7 +35,6 @@ $user = auth_user();
     </div>
   </nav>
 
-  <!-- Sidebar -->
   <aside class="app-sidebar bg-dark navbar-dark" data-bs-theme="dark">
     <div class="sidebar-brand">
       <a href="<?= APP_URL ?>" class="brand-link">
@@ -74,13 +72,43 @@ $user = auth_user();
               <p>My Challenges</p>
             </a>
           </li>
+          <?php elseif ($user && $user['role'] === 'admin'): ?>
+          <li class="nav-item">
+            <a href="<?= APP_URL ?>/admin/index.php" class="nav-link">
+              <i class="nav-icon fas fa-shield-halved"></i>
+              <p>Admin Dashboard</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="<?= APP_URL ?>/admin/index.php#configuration" class="nav-link">
+              <i class="nav-icon fas fa-sliders-h"></i>
+              <p>Configuration</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="<?= APP_URL ?>/organizers/index.php" class="nav-link">
+              <i class="nav-icon fas fa-tachometer-alt"></i>
+              <p>Organizer Tools</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="<?= APP_URL ?>/authors/index.php" class="nav-link">
+              <i class="nav-icon fas fa-pencil-alt"></i>
+              <p>Author View</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="<?= APP_URL ?>/participants/index.php" class="nav-link">
+              <i class="nav-icon fas fa-trophy"></i>
+              <p>Participant View</p>
+            </a>
+          </li>
           <?php endif; ?>
         </ul>
       </nav>
     </div>
   </aside>
 
-  <!-- Main Content -->
   <main class="app-main">
     <div class="app-content-header">
       <div class="container-fluid">

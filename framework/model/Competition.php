@@ -17,9 +17,13 @@ class Competition {
         return $this->db->query('SELECT comp.*, u.username as creator FROM competitions comp LEFT JOIN users u ON comp.created_by = u.id ORDER BY comp.created_at DESC')->fetchAll();
     }
 
+    public function countAll(): int {
+        return (int)$this->db->query('SELECT COUNT(*) FROM competitions')->fetchColumn();
+    }
+
     public function findActive(): array {
         $stmt = $this->db->prepare(
-            "SELECT * FROM competitions WHERE (start_time IS NULL OR start_time <= NOW()) AND (end_time IS NULL OR end_time >= NOW()) ORDER BY created_at DESC"
+            'SELECT * FROM competitions WHERE (start_time IS NULL OR start_time <= NOW()) AND (end_time IS NULL OR end_time >= NOW()) ORDER BY created_at DESC'
         );
         $stmt->execute();
         return $stmt->fetchAll();
@@ -35,9 +39,7 @@ class Competition {
 
     public function getChallenges(int $competitionId): array {
         $stmt = $this->db->prepare(
-            'SELECT ch.* FROM challenges ch 
-             JOIN competition_challenges cc ON ch.id = cc.challenge_id 
-             WHERE cc.competition_id = ?'
+            'SELECT ch.* FROM challenges ch JOIN competition_challenges cc ON ch.id = cc.challenge_id WHERE cc.competition_id = ?'
         );
         $stmt->execute([$competitionId]);
         return $stmt->fetchAll();

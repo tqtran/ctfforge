@@ -1,4 +1,4 @@
-framework/secrets/db.php
+framework/secrets/db.yaml
 uploads/*
 !uploads/.gitkeep
 *.log
