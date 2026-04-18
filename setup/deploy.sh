@@ -34,7 +34,9 @@ define('DB_USER', $(php_literal "${DB_USER}"));
 define('DB_PASS', $(php_literal "${DB_PASS}"));
 EOF
   if ! chmod 600 "${SECRETS_FILE}"; then
-    printf 'Warning: could not restrict permissions on %s\n' "${SECRETS_FILE}" >&2
+    rm -f "${SECRETS_FILE}"
+    printf 'Error: could not restrict permissions on %s\n' "${SECRETS_FILE}" >&2
+    exit 1
   fi
 fi
 
@@ -48,7 +50,7 @@ Next steps:
   1. Create the database if it does not already exist.
   2. Import the schema:
      mysql -h "${DB_HOST}" -u "${DB_USER}" --database="${DB_NAME}" -p < "${SCHEMA_FILE}"
-     This command will prompt for the database password.
+     This command prompts for the database password; DB_PASS only updates the app config file.
   3. Point your web server at:
      ${REPO_ROOT}
 

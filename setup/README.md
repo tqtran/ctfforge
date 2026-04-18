@@ -16,6 +16,7 @@ mysql -h <host> -u <user> --database=<database> -p < ./setup/schema.sql
 ```
 
 Pass `--force` to `./setup/deploy.sh` to regenerate `framework/secrets/db.php` with updated environment variables.
+The generated import command still prompts for the database password interactively; `DB_PASS` only updates the PHP application config.
 
 Keep `setup/schema.sql` and `framework/schema.sql` identical whenever the schema changes.
 After editing `setup/schema.sql`, run `bash ./setup/sync-schema.sh`.
