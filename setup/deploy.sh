@@ -11,8 +11,8 @@ DB_NAME="${DB_NAME:-ctfforge}"
 DB_USER="${DB_USER:-root}"
 DB_PASS="${DB_PASS:-}"
 
-php_escape() {
-  printf '%s' "$1" | sed "s/[\\\\']/\\\\&/g"
+php_literal() {
+  php -r 'var_export($argv[1]);' "$1"
 }
 
 mkdir -p "${REPO_ROOT}/framework/secrets" "${REPO_ROOT}/uploads"
@@ -20,10 +20,10 @@ mkdir -p "${REPO_ROOT}/framework/secrets" "${REPO_ROOT}/uploads"
 if [[ ! -f "${SECRETS_FILE}" ]]; then
   cat > "${SECRETS_FILE}" <<EOF
 <?php
-define('DB_HOST', '$(php_escape "${DB_HOST}")');
-define('DB_NAME', '$(php_escape "${DB_NAME}")');
-define('DB_USER', '$(php_escape "${DB_USER}")');
-define('DB_PASS', '$(php_escape "${DB_PASS}")');
+define('DB_HOST', $(php_literal "${DB_HOST}"));
+define('DB_NAME', $(php_literal "${DB_NAME}"));
+define('DB_USER', $(php_literal "${DB_USER}"));
+define('DB_PASS', $(php_literal "${DB_PASS}"));
 EOF
   chmod 600 "${SECRETS_FILE}" 2>/dev/null || true
 fi
@@ -37,7 +37,7 @@ Schema file:     ${SCHEMA_FILE}
 Next steps:
   1. Create the database if it does not already exist.
   2. Import the schema:
-     mysql -h ${DB_HOST} -u ${DB_USER} --database=${DB_NAME} -p < ${SCHEMA_FILE}
+     mysql -h "${DB_HOST}" -u "${DB_USER}" --database="${DB_NAME}" -p < "${SCHEMA_FILE}"
   3. Point your web server at:
      ${REPO_ROOT}
 
