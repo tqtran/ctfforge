@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $found = $userModel->findByUsername($username);
             if ($found && $userModel->verifyPassword($found, $password)) {
                 session_regenerate_id(true);
+                unset($_SESSION['csrf_token']); // regenerate CSRF token on login
                 $_SESSION['user_id'] = $found['id'];
                 $_SESSION['username'] = $found['username'];
                 $_SESSION['role'] = $found['role'];

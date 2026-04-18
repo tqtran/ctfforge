@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
 $challenges = $challengeModel->findAll();
 $competitions = $competitionModel->findAll();
-$allChallenges = $challengeModel->findAll();
+$allChallenges = $challenges;
 
 $pageTitle = 'Organizer Dashboard';
 include __DIR__ . '/../framework/views/header.php';

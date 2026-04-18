@@ -73,8 +73,8 @@ include __DIR__ . '/../framework/views/header.php';
           $datasets = $challengeModel->getDatasets((int)$challenge['id']);
           $solved = $submissionModel->hasCorrectSubmission((int)$user['id'], (int)$challenge['id']);
           if (empty($datasets)) continue;
-          // Pick a dataset for this user (rotate by user_id % count)
-          $datasetIndex = (int)$user['id'] % count($datasets);
+          // Deterministic but unpredictable dataset assignment per user+challenge
+          $datasetIndex = abs(crc32($user['id'] . ':' . $challenge['id'])) % count($datasets);
           $dataset = $datasets[$datasetIndex];
           $dataset['template'] = $challenge['template'];
       ?>
