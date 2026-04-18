@@ -1,256 +1,195 @@
 <?php
+require_once __DIR__ . '/framework/bootstrap.php';
+
+$user = auth_user();
+if ($user) {
+    redirect(dashboard_url($user['role']));
+}
+
+$error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!csrf_verify()) {
+        $error = 'Invalid security token. Please try again.';
+    } else {
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+        if ($username && $password) {
+            $userModel = new User();
+            $found = $userModel->findByUsername($username);
+            if ($found && $userModel->verifyPassword($found, $password)) {
+                session_regenerate_id(true);
+                unset($_SESSION['csrf_token']);
+                $_SESSION['user_id'] = $found['id'];
+                $_SESSION['username'] = $found['username'];
+                $_SESSION['role'] = $found['role'];
+                redirect(dashboard_url($found['role']));
+            } else {
+                $error = 'Invalid username or password.';
+            }
+        } else {
+            $error = 'Please enter username and password.';
+        }
+    }
+}
+
 $audiences = [
     [
         'title' => 'Challenge Authors',
-        'description' => 'Turn your ideas into memorable challenges, earn badges, unlock commissions, and build a reputation for crafting great learning experiences.',
+        'description' => 'Turn ideas into standout challenges, earn badges, unlock commission opportunities, and build a reputation for creating memorable learning experiences.',
+        'icon' => 'fa-pen-ruler',
     ],
     [
         'title' => 'Organizers',
-        'description' => 'Launch polished CTFs quickly with a platform designed to simplify setup, manage events smoothly, and keep players engaged from start to finish.',
+        'description' => 'Launch polished CTFs faster with dashboards, flexible challenge workflows, and tools that make event setup and delivery easier.',
+        'icon' => 'fa-layer-group',
     ],
     [
         'title' => 'Participants',
-        'description' => 'Learn new skills, solve creative problems, team up with friends, and enjoy the thrill of hands-on cybersecurity practice.',
+        'description' => 'Learn by solving, team up with friends, and enjoy practical security challenges that make every event rewarding and fun.',
+        'icon' => 'fa-user-group',
     ],
 ];
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CTFForge</title>
-    <style>
-        :root {
-            color-scheme: dark;
-            --bg: #081122;
-            --panel: rgba(10, 22, 44, 0.86);
-            --panel-border: rgba(148, 163, 184, 0.18);
-            --accent: #5eead4;
-            --accent-strong: #22d3ee;
-            --text: #e2e8f0;
-            --muted: #cbd5e1;
-            --shadow: rgba(8, 17, 34, 0.32);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><?= APP_NAME ?> - CTF Platform</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      color-scheme: dark;
+    }
 
-        * {
-            box-sizing: border-box;
-        }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(34, 211, 238, 0.2), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(250, 204, 21, 0.16), transparent 24%),
+        linear-gradient(135deg, #0f172a 0%, #16213e 50%, #0f3460 100%);
+    }
 
-        body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: Arial, sans-serif;
-            color: var(--text);
-            background:
-                radial-gradient(circle at top left, rgba(34, 211, 238, 0.22), transparent 32%),
-                radial-gradient(circle at bottom right, rgba(94, 234, 212, 0.18), transparent 28%),
-                linear-gradient(160deg, #020617 0%, #0f172a 50%, #111827 100%);
-        }
+    .glass-panel {
+      backdrop-filter: blur(12px);
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.32);
+    }
 
-        .page {
-            width: min(1120px, calc(100% - 3rem));
-            margin: 0 auto;
-            padding: 4rem 0 5rem;
-        }
+    .hero-kicker {
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #67e8f9;
+    }
 
-        .hero,
-        .audience-card,
-        .highlights {
-            background: var(--panel);
-            border: 1px solid var(--panel-border);
-            border-radius: 24px;
-            box-shadow: 0 24px 60px var(--shadow);
-        }
+    .hero-title {
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      line-height: 1.05;
+    }
 
-        .hero {
-            padding: 4rem;
-            text-align: center;
-        }
+    .brand-icon {
+      font-size: 3.5rem;
+      color: #facc15;
+    }
 
-        .eyebrow {
-            margin: 0 0 1rem;
-            color: var(--accent);
-            font-size: 0.95rem;
-            font-weight: bold;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-        }
+    .audience-card {
+      height: 100%;
+      border-radius: 1.25rem;
+    }
 
-        h1,
-        h2,
-        h3,
-        p {
-            margin-top: 0;
-        }
+    .audience-icon {
+      width: 3rem;
+      height: 3rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: rgba(34, 211, 238, 0.14);
+      color: #67e8f9;
+    }
 
-        h1 {
-            margin-bottom: 1rem;
-            font-size: clamp(2.5rem, 5vw, 4.5rem);
-            line-height: 1.05;
-        }
+    .login-card .input-group-text,
+    .login-card .form-control {
+      background: rgba(15, 23, 42, 0.92);
+      color: #fff;
+      border-color: rgba(148, 163, 184, 0.25);
+    }
 
-        .hero p {
-            max-width: 760px;
-            margin: 0 auto 1.5rem;
-            font-size: 1.15rem;
-            line-height: 1.7;
-            color: var(--muted);
-        }
-
-        .hero strong {
-            color: #ffffff;
-        }
-
-        .cta-row {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .cta {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.95rem 1.4rem;
-            border-radius: 999px;
-            color: #001018;
-            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .cta.secondary {
-            color: var(--text);
-            background: rgba(148, 163, 184, 0.1);
-            border: 1px solid rgba(148, 163, 184, 0.28);
-        }
-
-        .section-title {
-            margin: 3rem 0 1.25rem;
-            font-size: 2rem;
-            text-align: center;
-        }
-
-        .section-copy {
-            max-width: 760px;
-            margin: 0 auto 2rem;
-            text-align: center;
-            line-height: 1.7;
-            color: var(--muted);
-        }
-
-        .audiences {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .audience-card {
-            padding: 2rem;
-        }
-
-        .audience-card h3 {
-            margin-bottom: 0.75rem;
-            font-size: 1.3rem;
-        }
-
-        .audience-card p {
-            margin-bottom: 0;
-            line-height: 1.7;
-            color: var(--muted);
-        }
-
-        .highlights {
-            margin-top: 2rem;
-            padding: 2rem;
-        }
-
-        .highlight-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1rem 1.5rem;
-            padding: 0;
-            margin: 1rem 0 0;
-            list-style: none;
-        }
-
-        .highlight-list li {
-            padding: 1rem 1.15rem;
-            border-radius: 18px;
-            background: rgba(15, 23, 42, 0.68);
-            border: 1px solid rgba(148, 163, 184, 0.16);
-            color: var(--muted);
-            line-height: 1.6;
-        }
-
-        @media (max-width: 720px) {
-            .page {
-                width: min(100% - 1.5rem, 1120px);
-                padding: 1.5rem 0 3rem;
-            }
-
-            .hero,
-            .audience-card,
-            .highlights {
-                border-radius: 20px;
-            }
-
-            .hero {
-                padding: 2.25rem 1.5rem;
-            }
-
-            .audiences,
-            .highlight-list {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    .benefit-list li + li {
+      margin-top: 0.75rem;
+    }
+  </style>
 </head>
-<body>
-    <main class="page">
-        <section class="hero">
-            <p class="eyebrow">Create. Host. Learn. Compete.</p>
-            <h1>Welcome to CTFForge</h1>
-            <p>
-                CTFForge is where <strong>authors</strong> shape standout challenges, <strong>organizers</strong> launch events with less friction,
-                and <strong>participants</strong> grow their skills through playful, practical security experiences.
-            </p>
-            <p>
-                Whether you want to earn recognition, streamline your next competition, or simply have fun while learning, CTFForge is built to make the journey rewarding.
-            </p>
-            <div class="cta-row">
-                <a class="cta" href="#audiences">See what you can do</a>
-                <a class="cta secondary" href="#highlights">Explore the highlights</a>
+<body class="text-white">
+<div class="container py-5">
+  <div class="row align-items-center g-4 g-xl-5">
+    <div class="col-lg-7">
+      <div class="glass-panel rounded-4 p-4 p-lg-5">
+        <p class="hero-kicker fw-semibold mb-3">Create. Host. Learn. Compete.</p>
+        <h1 class="hero-title fw-bold mb-3">CTFForge helps every CTF audience feel at home.</h1>
+        <p class="lead text-white-50 mb-4">
+          <span class="fw-semibold text-white">Authors</span> can earn badges, commissions, and recognition.
+          <span class="fw-semibold text-white">Organizers</span> can create and run polished CTFs with less friction.
+          <span class="fw-semibold text-white">Participants</span> can learn new skills, solve creative problems, and have fun.
+        </p>
+        <ul class="benefit-list list-unstyled text-white-50 mb-0">
+          <li><i class="fas fa-check-circle text-info me-2"></i>Reward challenge authors for quality content and creativity.</li>
+          <li><i class="fas fa-check-circle text-info me-2"></i>Give organizers a faster path from setup to launch day.</li>
+          <li><i class="fas fa-check-circle text-info me-2"></i>Make learning cybersecurity social, practical, and enjoyable for participants.</li>
+        </ul>
+      </div>
+      <div class="row row-cols-1 row-cols-md-3 g-3 mt-1">
+        <?php foreach ($audiences as $audience): ?>
+        <div class="col">
+          <div class="glass-panel audience-card p-4">
+            <div class="audience-icon mb-3">
+              <i class="fas <?= htmlspecialchars($audience['icon'], ENT_QUOTES, 'UTF-8') ?>"></i>
             </div>
-        </section>
-
-        <section id="audiences">
-            <h2 class="section-title">Something exciting for every audience</h2>
-            <p class="section-copy">
-                From first-time players to experienced event teams, CTFForge helps everyone join the same ecosystem with clear value and a welcoming experience.
-            </p>
-            <div class="audiences">
-                <?php foreach ($audiences as $audience): ?>
-                    <article class="audience-card">
-                        <h3><?= htmlspecialchars($audience['title'], ENT_QUOTES, 'UTF-8') ?></h3>
-                        <p><?= htmlspecialchars($audience['description'], ENT_QUOTES, 'UTF-8') ?></p>
-                    </article>
-                <?php endforeach; ?>
+            <h2 class="h5 mb-2"><?= htmlspecialchars($audience['title'], ENT_QUOTES, 'UTF-8') ?></h2>
+            <p class="text-white-50 mb-0"><?= htmlspecialchars($audience['description'], ENT_QUOTES, 'UTF-8') ?></p>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="text-center mb-4">
+        <i class="fas fa-flag brand-icon"></i>
+        <h2 class="fw-bold mt-2 mb-2"><?= APP_NAME ?></h2>
+        <p class="text-white-50 mb-0">Capture The Flag Platform</p>
+      </div>
+      <div class="card glass-panel login-card border-0 rounded-4 shadow-lg">
+        <div class="card-body p-4 p-lg-5">
+          <h3 class="h4 mb-4 text-center">Sign In</h3>
+          <?php if ($error): ?>
+          <div class="alert alert-danger py-2"><i class="fas fa-exclamation-circle me-1"></i><?= htmlspecialchars($error) ?></div>
+          <?php endif; ?>
+          <form method="POST" action="index.php">
+            <?= csrf_field() ?>
+            <div class="mb-3">
+              <label class="form-label">Username</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                <input type="text" class="form-control" name="username" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required autofocus>
+              </div>
             </div>
-        </section>
-
-        <section id="highlights" class="highlights">
-            <h2>Why people choose CTFForge</h2>
-            <ul class="highlight-list">
-                <li>Authors can earn badges, visibility, and commission opportunities for the challenges they create.</li>
-                <li>Organizers can stand up compelling CTF events quickly without getting buried in setup complexity.</li>
-                <li>Participants can practice, learn, and celebrate progress in a community built around curiosity and fun.</li>
-                <li>Teams get a polished home for challenge creation, event delivery, and memorable security education.</li>
-            </ul>
-        </section>
-    </main>
+            <div class="mb-4">
+              <label class="form-label">Password</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                <input type="password" class="form-control" name="password" required>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-warning w-100 fw-bold"><i class="fas fa-sign-in-alt me-1"></i>Login</button>
+          </form>
+        </div>
+      </div>
+      <p class="text-center text-white-50 mt-3 small mb-0">Contact an administrator for account access.</p>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
