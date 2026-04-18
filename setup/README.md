@@ -10,8 +10,8 @@ Use this folder for fast local or server deployment.
 ## Usage
 
 ```bash
-bash /home/runner/work/ctfforge/ctfforge/setup/deploy.sh
-mysql -h <host> -u <user> -p <database> < /home/runner/work/ctfforge/ctfforge/setup/schema.sql
+bash ./setup/deploy.sh
+mysql -h <host> -u <user> -p <database> < ./setup/schema.sql
 ```
 
 Keep `setup/schema.sql` and `framework/schema.sql` identical whenever the schema changes.
