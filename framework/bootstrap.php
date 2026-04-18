@@ -14,7 +14,8 @@ $appUrl = rtrim((string)ConfigRepository::getValue($config, 'app.url', 'http://l
 $uploadDirSetting = (string)ConfigRepository::getValue($config, 'uploads.dir', 'uploads');
 $uploadUrlSetting = (string)ConfigRepository::getValue($config, 'uploads.url', '/uploads');
 
-if (!preg_match('/^(\/|[A-Za-z]:[\\\/])/', $uploadDirSetting)) {
+$isAbsoluteUploadDir = str_starts_with($uploadDirSetting, '/') || preg_match('#^[A-Za-z]:[\\/]#', $uploadDirSetting) === 1;
+if (!$isAbsoluteUploadDir) {
     $uploadDirSetting = $rootPath . '/' . ltrim($uploadDirSetting, '/');
 }
 $uploadDir = rtrim(str_replace('\\', '/', $uploadDirSetting), '/') . '/';
