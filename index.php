@@ -22,7 +22,7 @@ $audiences = [
     <title>CTFForge</title>
     <style>
         :root {
-            color-scheme: light;
+            color-scheme: dark;
             --bg: #081122;
             --panel: rgba(10, 22, 44, 0.86);
             --panel-border: rgba(148, 163, 184, 0.18);
@@ -200,6 +200,11 @@ $audiences = [
 
             .hero {
                 padding: 2.25rem 1.5rem;
+            }
+
+            .audiences,
+            .highlight-list {
+                grid-template-columns: 1fr;
             }
         }
     </style>
